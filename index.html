@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUNE STUDIO | 내 몸에 가장 편안한 실루엣</title>
+    <script src="https://tailwindcss.com"></script>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; color: #2C2A29; background-color: #FAF9F6; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- 顶部公告栏 (Top Notice) -->
+    <div class="bg-[#2C2A29] text-[#FAF9F6] text-xs text-center py-2.5 tracking-wide">
+        카카오톡 채널 추가 시 즉시 사용 가능한 3,000원 쿠폰 증정 | 5만원 이상 무료배송
+    </div>
+
+    <!-- 导航栏 (Header) -->
+    <header class="sticky top-0 z-40 bg-[#FAF9F6]/90 backdrop-blur-md border-b border-[#EAE6DF]">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <a href="#" class="text-xl font-medium tracking-[0.2em] text-[#2C2A29]">LUNE</a>
+            
+            <nav class="hidden md:flex space-x-8 text-sm text-[#5C5855]">
+                <button onclick="filterProducts('all')" class="hover:text-[#2C2A29] transition">전체상품</button>
+                <button onclick="filterProducts('bra')" class="hover:text-[#2C2A29] transition">심리스 브라</button>
+                <button onclick="filterProducts('panty')" class="hover:text-[#2C2A29] transition">팬티</button>
+                <button onclick="filterProducts('set')" class="hover:text-[#2C2A29] transition">브라렛 세트</button>
+                <button onclick="filterProducts('lounge')" class="hover:text-[#2C2A29] transition">라운지웨어</button>
+            </nav>
+
+            <div class="flex items-center space-x-5 text-sm">
+                <button onclick="alert('카카오 1초 로그인 모듈 연동 영역입니다.')" class="hidden sm:inline-block text-xs bg-[#FEE500] text-[#191919] px-3 py-1.5 rounded font-medium">
+                    카카오 로그인
+                </button>
+                <button onclick="toggleCart()" class="relative flex items-center space-x-1 text-[#2C2A29]">
+                    <span>장바구니</span>
+                    <span id="cart-count" class="bg-[#8C7A6B] text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主视觉横幅 (Hero Banner) -->
+    <section class="relative bg-[#EFECE6] overflow-hidden">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24 grid md:grid-cols-2 gap-8 items-center">
+            <div class="space-y-5">
+                <span class="text-xs tracking-[0.15em] text-[#8C7A6B] uppercase">2026 Seamless Collection</span>
+                <h1 class="text-3xl md:text-4xl font-light leading-snug text-[#2C2A29]">
+                    입지 않은 듯 가벼운,<br>
+                    <span class="font-normal">온전한 나를 위한 휴식</span>
+                </h1>
+                <p class="text-sm text-[#6E6A66] leading-relaxed max-w-md">
+                    와이어와 봉제선 없는 독자적인 퓨징 기법으로 하루 종일 압박감 없는 편안함을 선사합니다.
+                </p>
+                <div class="pt-2">
+                    <a href="#products" class="inline-block bg-[#2C2A29] text-white text-xs tracking-wider px-7 py-3.5 hover:bg-[#454240] transition">
+                        컬렉션 보기
+                    </a>
+                </div>
+            </div>
+            <div class="aspect-[4/3] bg-[#E2DDD5] rounded-sm overflow-hidden">
+                <img src="https://unsplash.com" alt="Minimalist Lingerie" class="w-full h-full object-cover opacity-90">
+            </div>
+        </div>
+    </section>
+
+    <!-- 分类筛选与商品列表 (Product Grid) -->
+    <main id="products" class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4">
+            <div>
+                <h2 class="text-xl font-normal text-[#2C2A29]">시그니처 라인업</h2>
+                <p class="text-xs text-[#7A7571] mt-1">총 <span id="item-total">12</span>개의 엄선된 데일리 언더웨어</p>
+            </div>
+            
+            <!-- 移动端/桌面端通用分类标签 -->
+            <div class="flex space-x-2 overflow-x-auto no-scrollbar pb-1" id="category-tabs">
+                <button onclick="filterProducts('all', this)" class="cat-btn active bg-[#2C2A29] text-white text-xs px-4 py-2 rounded-full whitespace-nowrap">전체 (12)</button>
+                <button onclick="filterProducts('bra', this)" class="cat-btn bg-[#EFECE6] text-[#5C5855] text-xs px-4 py-2 rounded-full whitespace-nowrap">심리스 브라</button>
+                <button onclick="filterProducts('panty', this)" class="cat-btn bg-[#EFECE6] text-[#5C5855] text-xs px-4 py-2 rounded-full whitespace-nowrap">노라인 팬티</button>
+                <button onclick="filterProducts('set', this)" class="cat-btn bg-[#EFECE6] text-[#5C5855] text-xs px-4 py-2 rounded-full whitespace-nowrap">세트 구성</button>
+                <button onclick="filterProducts('lounge', this)" class="cat-btn bg-[#EFECE6] text-[#5C5855] text-xs px-4 py-2 rounded-full whitespace-nowrap">라운지웨어</button>
+            </div>
+        </div>
+
+        <!-- 商品卡片网格 -->
+        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-10">
+            <!-- JS 动态渲染 12 款内衣商品 -->
+        </div>
+    </main>
+
+    <!-- 商品详情/尺码选择弹窗 (Quick View Modal) -->
+    <div id="product-modal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
+        <div class="bg-[#FAF9F6] max-w-lg w-full rounded-sm overflow-hidden shadow-xl">
+            <div class="p-6 space-y-5">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span id="modal-tag" class="text-[11px] text-[#8C7A6B] tracking-wider">BEST</span>
+                        <h3 id="modal-title" class="text-lg font-medium text-[#2C2A29] mt-0.5">상품명</h3>
+                        <p id="modal-price" class="text-base font-medium text-[#2C2A29] mt-1">0원</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-[#7A7571] hover:text-black text-xl">&times;</button>
+                </div>
+
+                <p id="modal-desc" class="text-xs text-[#6E6A66] leading-relaxed border-t border-[#EAE6DF] pt-4">
+                    상품 설명이 들어갑니다.
+                </p>
+
+                <!-- 颜色选择 -->
+                <div>
+                    <label class="block text-xs text-[#5C5855] mb-2">컬러 선택</label>
+                    <div id="modal-colors" class="flex space-x-2"></div>
+                </div>
+
+                <!-- 尺码选择 -->
+                <div>
+                    <label class="block text-xs text-[#5C5855] mb-2">사이즈 선택</label>
+                    <div class="grid grid-cols-4 gap-2" id="modal-sizes">
+                        <button type="button" onclick="selectSize(this, 'S (70A-75A)')" class="size-btn border border-[#D6D0C7] py-2 text-xs hover:border-[#2C2A29]">S</button>
+                        <button type="button" onclick="selectSize(this, 'M (75B-80A)')" class="size-btn border border-[#D6D0C7] py-2 text-xs hover:border-[#2C2A29]">M</button>
+                        <button type="button" onclick="selectSize(this, 'L (80B-85A)')" class="size-btn border border-[#D6D0C7] py-2 text-xs hover:border-[#2C2A29]">L</button>
+                        <button type="button" onclick="selectSize(this, 'XL (85B-90B)')" class="size-btn border border-[#D6D0C7] py-2 text-xs hover:border-[#2C2A29]">XL</button>
+                    </div>
+                    <p id="size-guide-text" class="text-[11px] text-[#8C7A6B] mt-1.5">사이즈를 선택해주세요. (예: M = 75B-80A 권장)</p>
+                </div>
+
+                <div class="pt-2 flex space-x-2">
+                    <button onclick="confirmAddToCart()" class="flex-1 bg-[#2C2A29] text-white text-xs py-3.5 hover:bg-[#454240] transition">
+                        장바구니 담기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车侧边栏 (Cart Drawer) -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 hidden bg-black/40 flex justify-end">
+        <div class="bg-[#FAF9F6] w-full max-w-md h-full flex flex-col justify-between p-6">
+            <div>
+                <div class="flex items-center justify-between border-b border-[#EAE6DF] pb-4">
+                    <h3 class="text-base font-medium">장바구니</h3>
+                    <button onclick="toggleCart()" class="text-xl text-[#7A7571]">&times;</button>
+                </div>
+                <div id="cart-items" class="py-4 space-y-4 max-h-[60vh] overflow-y-auto">
+                    <p class="text-xs text-[#7A7571] text-center py-10">장바구니가 비어 있습니다.</p>
+                </div>
+            </div>
+
+            <div class="border-t border-[#EAE6DF] pt-4 space-y-4">
+                <div class="flex justify-between text-xs text-[#6E6A66]">
+                    <span>배송비 (5만원 이상 무료)</span>
+                    <span id="shipping-fee">0원</span>
+                </div>
+                <div class="flex justify-between text-sm font-medium">
+                    <span>총 결제예정금액</span>
+                    <span id="cart-total">0원</span>
+                </div>
+                <div class="space-y-2">
+                    <button onclick="checkout('일반/카드결제')" class="w-full bg-[#2C2A29] text-white text-xs py-3.5 font-medium">
+                        주문하기 (카드 / 계좌이체)
+                    </button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="checkout('카카오페이')" class="bg-[#FEE500] text-[#191919] text-xs py-3 font-medium">
+                            카카오페이 구매
+                        </button>
+                        <button onclick="checkout('네이버페이')" class="bg-[#03C75A] text-white text-xs py-3 font-medium">
+                            N Pay 구매
