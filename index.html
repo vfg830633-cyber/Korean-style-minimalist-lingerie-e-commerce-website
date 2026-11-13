@@ -2,169 +2,314 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LUNE STUDIO | 내 몸에 가장 편안한 실루엣</title>
-    <script src="https://tailwindcss.com"></script>
-    <link href="https://googleapis.com" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LUNE STUDIO | 숏폼 언더웨어 스토어</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; color: #2C2A29; background-color: #FAF9F6; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #000; color: #fff; overflow: hidden; }
+        .video-feed { height: 100dvh; overflow-y: scroll; scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+        .video-feed::-webkit-scrollbar { display: none; }
+        .video-feed { -ms-overflow-style: none; scrollbar-width: none; }
+        .video-slide { height: 100dvh; scroll-snap-align: start; scroll-snap-stop: always; position: relative; }
+        @keyframes popHeart {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+        .heart-anim { animation: popHeart 0.8s ease-out forwards; }
+        .size-btn.active { background: #1c1917; color: #fff; border-color: #1c1917; }
+        .color-dot.active { outline: 2px solid #1c1917; outline-offset: 2px; }
     </style>
 </head>
-<body class="antialiased">
+<body class="flex justify-center bg-neutral-950">
 
-    <!-- 顶部公告栏 (Top Notice) -->
-    <div class="bg-[#2C2A29] text-[#FAF9F6] text-xs text-center py-2.5 tracking-wide">
-        카카오톡 채널 추가 시 즉시 사용 가능한 3,000원 쿠폰 증정 | 5만원 이상 무료배송
+    <div class="relative w-full max-w-[430px] h-[100dvh] bg-black overflow-hidden shadow-2xl border-x border-white/10">
+
+        <header class="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-4 pb-6 bg-gradient-to-b from-black/80 to-transparent">
+            <div class="flex items-center space-x-2">
+                <span class="text-base font-bold tracking-[0.2em]">LUNE</span>
+                <span class="text-[10px] bg-rose-500 text-white px-1.5 py-0.5 rounded font-medium">LIVE</span>
+            </div>
+            <div class="flex space-x-3 text-xs font-medium text-white/70">
+                <button onclick="filterFeed('all', this)" class="tab-btn text-white border-b-2 border-white pb-0.5">전체</button>
+                <button onclick="filterFeed('bra', this)" class="tab-btn hover:text-white pb-0.5">브라</button>
+                <button onclick="filterFeed('panty', this)" class="tab-btn hover:text-white pb-0.5">팬티</button>
+                <button onclick="filterFeed('set', this)" class="tab-btn hover:text-white pb-0.5">세트</button>
+            </div>
+            <button onclick="toggleCart()" class="relative p-1.5 bg-white/15 backdrop-blur-md rounded-full" aria-label="장바구니">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <span id="cart-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+            </button>
+        </header>
+
+        <button onclick="toggleMute()" class="absolute top-16 right-4 z-30 bg-black/50 backdrop-blur-md text-white/90 text-[11px] px-2.5 py-1 rounded-full border border-white/15 flex items-center gap-1">
+            <span id="mute-icon">🔇</span> <span id="mute-text">터치하여 소리 켜기</span>
+        </button>
+
+        <main id="video-feed" class="video-feed"></main>
+
+        <!-- 규격 선택 -->
+        <div id="buy-modal" class="absolute inset-0 z-40 hidden bg-black/60 flex flex-col justify-end">
+            <div class="bg-[#FAF9F6] text-[#2C2A29] rounded-t-2xl p-5 space-y-4">
+                <div class="flex justify-between items-start border-b border-stone-200 pb-3">
+                    <div class="flex gap-3">
+                        <div id="modal-thumb" class="w-14 h-16 rounded bg-stone-200"></div>
+                        <div>
+                            <span id="modal-tag" class="text-[10px] bg-stone-800 text-white px-1.5 py-0.5 rounded">BEST</span>
+                            <h3 id="modal-title" class="text-sm font-bold mt-1">상품명</h3>
+                            <p id="modal-price" class="text-sm font-bold text-rose-600 mt-0.5">0원</p>
+                        </div>
+                    </div>
+                    <button onclick="closeBuyModal()" class="text-stone-400 hover:text-black text-2xl leading-none">&times;</button>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-2">컬러 선택</label>
+                    <div id="modal-colors" class="flex gap-2.5"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-stone-600 mb-2">사이즈 선택</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button type="button" onclick="selectSize(this, 'S (70A-75A)')" class="size-btn border border-stone-300 py-2 text-xs rounded">S</button>
+                        <button type="button" onclick="selectSize(this, 'M (75B-80A)')" class="size-btn border border-stone-300 py-2 text-xs rounded">M</button>
+                        <button type="button" onclick="selectSize(this, 'L (80B-85A)')" class="size-btn border border-stone-300 py-2 text-xs rounded">L</button>
+                        <button type="button" onclick="selectSize(this, 'XL (85B-90B)')" class="size-btn border border-stone-300 py-2 text-xs rounded">XL</button>
+                    </div>
+                    <p id="size-hint" class="text-[11px] text-stone-500 mt-1.5">사이즈를 선택해주세요.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button onclick="addToCart(false)" class="border border-stone-800 text-stone-800 text-xs py-3.5 rounded-lg font-medium">장바구니 담기</button>
+                    <button onclick="addToCart(true)" class="bg-stone-900 text-white text-xs py-3.5 rounded-lg font-medium">바로 구매하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 장바구니 및 주문서 -->
+        <div id="cart-drawer" class="absolute inset-0 z-50 hidden bg-black/70 flex flex-col justify-end">
+            <div class="bg-[#FAF9F6] text-[#2C2A29] rounded-t-2xl p-5 max-h-[90dvh] overflow-y-auto space-y-4">
+                <div class="flex justify-between items-center border-b border-stone-200 pb-3">
+                    <h3 class="text-sm font-bold">장바구니 및 주문서 작성</h3>
+                    <button onclick="toggleCart()" class="text-2xl text-stone-400 leading-none">&times;</button>
+                </div>
+                <div id="cart-list" class="space-y-3 max-h-[28dvh] overflow-y-auto"></div>
+                <div class="border-t border-stone-200 pt-3 space-y-2.5 text-xs">
+                    <p class="font-bold text-stone-800">배송지 정보 (한국 국내배송)</p>
+                    <input id="order-name" type="text" placeholder="수령인 성함 (예: 김지민)" class="w-full border border-stone-300 rounded px-3 py-2 bg-white">
+                    <input id="order-phone" type="tel" placeholder="연락처 (예: 010-1234-5678)" class="w-full border border-stone-300 rounded px-3 py-2 bg-white">
+                    <input id="order-address" type="text" placeholder="도로명 주소 및 상세주소 (예: 서울시 강남구 테헤란로 123, 405호)" class="w-full border border-stone-300 rounded px-3 py-2 bg-white">
+                </div>
+                <div class="border-t border-stone-200 pt-3 space-y-2">
+                    <div class="flex justify-between text-xs text-stone-500">
+                        <span>배송비 (5만원 이상 무료)</span>
+                        <span id="ship-fee">0원</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-bold">
+                        <span>총 결제금액</span>
+                        <span id="total-price" class="text-rose-600">0원</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <button onclick="submitOrder('카카오페이')" class="bg-[#FEE500] text-[#191919] text-xs py-3 rounded-lg font-bold">카카오페이 결제</button>
+                        <button onclick="submitOrder('네이버페이')" class="bg-[#03C75A] text-white text-xs py-3 rounded-lg font-bold">N Pay 결제</button>
+                    </div>
+                    <button onclick="submitOrder('신용카드/무통장')" class="w-full bg-stone-900 text-white text-xs py-3 rounded-lg font-medium">일반 결제하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사업자 정보 -->
+        <div id="biz-modal" class="absolute inset-0 z-50 hidden bg-black/80 flex items-center justify-center p-5">
+            <div class="bg-stone-900 border border-white/15 rounded-xl p-5 text-xs text-stone-300 space-y-2 w-full">
+                <div class="flex justify-between items-center border-b border-white/10 pb-2 mb-2">
+                    <span class="font-bold text-white">사업자 정보 및 이용안내</span>
+                    <button onclick="toggleBizInfo()" class="text-lg text-stone-400">&times;</button>
+                </div>
+                <p>상호명: 룬 스튜디오 (LUNE STUDIO)</p>
+                <p>대표자: 홍길동 (개인사업자)</p>
+                <p>사업자등록번호: 000-00-00000</p>
+                <p>통신판매업신고: 제 2026-서울강남-0000호</p>
+                <p>사업장 주소: 서울특별시 강남구 테헤란로 000</p>
+                <p>고객센터: 02-0000-0000</p>
+                <p class="text-rose-400 pt-2">* 언더웨어 특성상 위생을 위해 착용 및 택 제거 시 교환/반품이 불가합니다.</p>
+            </div>
+        </div>
+
+        <button onclick="toggleBizInfo()" class="absolute bottom-2 left-4 z-30 text-[10px] text-white/50 underline">사업자 정보</button>
     </div>
 
-    <!-- 导航栏 (Header) -->
-    <header class="sticky top-0 z-40 bg-[#FAF9F6]/90 backdrop-blur-md border-b border-[#EAE6DF]">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-            <a href="#" class="text-xl font-medium tracking-[0.2em] text-[#2C2A29]">LUNE</a>
-            
-            <nav class="hidden md:flex space-x-8 text-sm text-[#5C5855]">
-                <button onclick="filterProducts('all')" class="hover:text-[#2C2A29] transition">전체상품</button>
-                <button onclick="filterProducts('bra')" class="hover:text-[#2C2A29] transition">심리스 브라</button>
-                <button onclick="filterProducts('panty')" class="hover:text-[#2C2A29] transition">팬티</button>
-                <button onclick="filterProducts('set')" class="hover:text-[#2C2A29] transition">브라렛 세트</button>
-                <button onclick="filterProducts('lounge')" class="hover:text-[#2C2A29] transition">라운지웨어</button>
-            </nav>
+    <script>
+        // 영상/사진이 없는 상품은 색상 배경으로 표시됩니다. thumb에 이미지 주소를 넣으면 사진이 보입니다.
+        const defaultProducts = [
+            { id: 1, category: 'bra', tag: 'BEST 1', name: '에어핏 퓨징 심리스 브라', price: 24900, likes: 1420,
+              desc: '쫀득한 텐션감 확인하세요! 말림 없이 하루종일 찰떡 밀착되는 0.1mm 심리스 브라 ✨ #심리스브라 #노와이어',
+              colors: ['#E8D8C8', '#2C2A29', '#D8B4A6'], thumb: '/images/product-1.jpg', bg: ['#d9c2ad', '#3b2f2a'] },
+            { id: 2, category: 'panty', tag: 'BEST 2', name: '노라인 심리스 팬티', price: 7900, likes: 980,
+              desc: '겉옷에 라인이 안 비쳐요. 피부처럼 얇은 한 장 팬티 #노라인 #데일리',
+              colors: ['#E8D8C8', '#2C2A29', '#C9A9A0'], thumb: '/images/product-2.jpg', bg: ['#c9a9a0', '#2a2224'] },
+            { id: 3, category: 'set', tag: 'SET', name: '데일리 브라팬티 세트', price: 29900, likes: 2310,
+              desc: '브라+팬티 한 번에 해결! 세트로 사면 더 가벼운 가격 #세트 #데일리언더웨어',
+              colors: ['#E8D8C8', '#2C2A29'], thumb: '', bg: ['#b8a597', '#1f1b1a'] },
+            { id: 4, category: 'bra', tag: 'NEW', name: '라운지 브라렛', price: 19900, likes: 640,
+              desc: '집에서도 밖에서도 편한 소프트 브라렛 #브라렛 #라운지웨어',
+              colors: ['#D8B4A6', '#2C2A29', '#EDE4DA'], thumb: '', bg: ['#d8b4a6', '#38292b'] },
+            { id: 5, category: 'panty', tag: 'NEW', name: '코튼 밴딩 팬티 3종', price: 15900, likes: 512,
+              desc: '부드러운 코튼 소재, 하루 종일 쾌적하게 #코튼 #3종세트',
+              colors: ['#EDE4DA', '#2C2A29'], thumb: '', bg: ['#e0d5c8', '#34302d'] }
+        ];
 
-            <div class="flex items-center space-x-5 text-sm">
-                <button onclick="alert('카카오 1초 로그인 모듈 연동 영역입니다.')" class="hidden sm:inline-block text-xs bg-[#FEE500] text-[#191919] px-3 py-1.5 rounded font-medium">
-                    카카오 로그인
-                </button>
-                <button onclick="toggleCart()" class="relative flex items-center space-x-1 text-[#2C2A29]">
-                    <span>장바구니</span>
-                    <span id="cart-count" class="bg-[#8C7A6B] text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center">0</span>
-                </button>
-            </div>
-        </div>
-    </header>
+        let products = defaultProducts.slice();
+        let cart = [];
+        let muted = true;
+        let current = null, selColor = null, selSize = null;
+        const won = n => n.toLocaleString('ko-KR') + '원';
+        const $ = id => document.getElementById(id);
 
-    <!-- 主视觉横幅 (Hero Banner) -->
-    <section class="relative bg-[#EFECE6] overflow-hidden">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24 grid md:grid-cols-2 gap-8 items-center">
-            <div class="space-y-5">
-                <span class="text-xs tracking-[0.15em] text-[#8C7A6B] uppercase">2026 Seamless Collection</span>
-                <h1 class="text-3xl md:text-4xl font-light leading-snug text-[#2C2A29]">
-                    입지 않은 듯 가벼운,<br>
-                    <span class="font-normal">온전한 나를 위한 휴식</span>
-                </h1>
-                <p class="text-sm text-[#6E6A66] leading-relaxed max-w-md">
-                    와이어와 봉제선 없는 독자적인 퓨징 기법으로 하루 종일 압박감 없는 편안함을 선사합니다.
-                </p>
-                <div class="pt-2">
-                    <a href="#products" class="inline-block bg-[#2C2A29] text-white text-xs tracking-wider px-7 py-3.5 hover:bg-[#454240] transition">
-                        컬렉션 보기
-                    </a>
-                </div>
-            </div>
-            <div class="aspect-[4/3] bg-[#E2DDD5] rounded-sm overflow-hidden">
-                <img src="https://unsplash.com" alt="Minimalist Lingerie" class="w-full h-full object-cover opacity-90">
-            </div>
-        </div>
-    </section>
-
-    <!-- 分类筛选与商品列表 (Product Grid) -->
-    <main id="products" class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4">
-            <div>
-                <h2 class="text-xl font-normal text-[#2C2A29]">시그니처 라인업</h2>
-                <p class="text-xs text-[#7A7571] mt-1">총 <span id="item-total">12</span>개의 엄선된 데일리 언더웨어</p>
-            </div>
-            
-            <!-- 移动端/桌面端通用分类标签 -->
-            <div class="flex space-x-2 overflow-x-auto no-scrollbar pb-1" id="category-tabs">
-                <button onclick="filterProducts('all', this)" class="cat-btn active bg-[#2C2A29] text-white text-xs px-4 py-2 rounded-full whitespace-nowrap">전체 (12)</button>
-                <button onclick="filterProducts('bra', this)" class="cat-btn bg-[#EFECE6] text-[#5C5855] text-xs px-4 py-2 rounded-full whitespace-nowrap">심리스 브라</button>
-                <button onclick="filterProducts('panty', this)" class="cat-btn bg-[#EFECE6] text-[#5C5855] text-xs px-4 py-2 rounded-full whitespace-nowrap">노라인 팬티</button>
-                <button onclick="filterProducts('set', this)" class="cat-btn bg-[#EFECE6] text-[#5C5855] text-xs px-4 py-2 rounded-full whitespace-nowrap">세트 구성</button>
-                <button onclick="filterProducts('lounge', this)" class="cat-btn bg-[#EFECE6] text-[#5C5855] text-xs px-4 py-2 rounded-full whitespace-nowrap">라운지웨어</button>
-            </div>
-        </div>
-
-        <!-- 商品卡片网格 -->
-        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-10">
-            <!-- JS 动态渲染 12 款内衣商品 -->
-        </div>
-    </main>
-
-    <!-- 商品详情/尺码选择弹窗 (Quick View Modal) -->
-    <div id="product-modal" class="fixed inset-0 z-50 hidden bg-black/40 flex items-center justify-center p-4">
-        <div class="bg-[#FAF9F6] max-w-lg w-full rounded-sm overflow-hidden shadow-xl">
-            <div class="p-6 space-y-5">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <span id="modal-tag" class="text-[11px] text-[#8C7A6B] tracking-wider">BEST</span>
-                        <h3 id="modal-title" class="text-lg font-medium text-[#2C2A29] mt-0.5">상품명</h3>
-                        <p id="modal-price" class="text-base font-medium text-[#2C2A29] mt-1">0원</p>
-                    </div>
-                    <button onclick="closeModal()" class="text-[#7A7571] hover:text-black text-xl">&times;</button>
-                </div>
-
-                <p id="modal-desc" class="text-xs text-[#6E6A66] leading-relaxed border-t border-[#EAE6DF] pt-4">
-                    상품 설명이 들어갑니다.
-                </p>
-
-                <!-- 颜色选择 -->
-                <div>
-                    <label class="block text-xs text-[#5C5855] mb-2">컬러 선택</label>
-                    <div id="modal-colors" class="flex space-x-2"></div>
-                </div>
-
-                <!-- 尺码选择 -->
-                <div>
-                    <label class="block text-xs text-[#5C5855] mb-2">사이즈 선택</label>
-                    <div class="grid grid-cols-4 gap-2" id="modal-sizes">
-                        <button type="button" onclick="selectSize(this, 'S (70A-75A)')" class="size-btn border border-[#D6D0C7] py-2 text-xs hover:border-[#2C2A29]">S</button>
-                        <button type="button" onclick="selectSize(this, 'M (75B-80A)')" class="size-btn border border-[#D6D0C7] py-2 text-xs hover:border-[#2C2A29]">M</button>
-                        <button type="button" onclick="selectSize(this, 'L (80B-85A)')" class="size-btn border border-[#D6D0C7] py-2 text-xs hover:border-[#2C2A29]">L</button>
-                        <button type="button" onclick="selectSize(this, 'XL (85B-90B)')" class="size-btn border border-[#D6D0C7] py-2 text-xs hover:border-[#2C2A29]">XL</button>
-                    </div>
-                    <p id="size-guide-text" class="text-[11px] text-[#8C7A6B] mt-1.5">사이즈를 선택해주세요. (예: M = 75B-80A 권장)</p>
-                </div>
-
-                <div class="pt-2 flex space-x-2">
-                    <button onclick="confirmAddToCart()" class="flex-1 bg-[#2C2A29] text-white text-xs py-3.5 hover:bg-[#454240] transition">
-                        장바구니 담기
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 购物车侧边栏 (Cart Drawer) -->
-    <div id="cart-drawer" class="fixed inset-0 z-50 hidden bg-black/40 flex justify-end">
-        <div class="bg-[#FAF9F6] w-full max-w-md h-full flex flex-col justify-between p-6">
-            <div>
-                <div class="flex items-center justify-between border-b border-[#EAE6DF] pb-4">
-                    <h3 class="text-base font-medium">장바구니</h3>
-                    <button onclick="toggleCart()" class="text-xl text-[#7A7571]">&times;</button>
-                </div>
-                <div id="cart-items" class="py-4 space-y-4 max-h-[60vh] overflow-y-auto">
-                    <p class="text-xs text-[#7A7571] text-center py-10">장바구니가 비어 있습니다.</p>
-                </div>
-            </div>
-
-            <div class="border-t border-[#EAE6DF] pt-4 space-y-4">
-                <div class="flex justify-between text-xs text-[#6E6A66]">
-                    <span>배송비 (5만원 이상 무료)</span>
-                    <span id="shipping-fee">0원</span>
-                </div>
-                <div class="flex justify-between text-sm font-medium">
-                    <span>총 결제예정금액</span>
-                    <span id="cart-total">0원</span>
-                </div>
-                <div class="space-y-2">
-                    <button onclick="checkout('일반/카드결제')" class="w-full bg-[#2C2A29] text-white text-xs py-3.5 font-medium">
-                        주문하기 (카드 / 계좌이체)
-                    </button>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="checkout('카카오페이')" class="bg-[#FEE500] text-[#191919] text-xs py-3 font-medium">
-                            카카오페이 구매
+        function renderFeed(list) {
+            const feed = $('video-feed');
+            feed.innerHTML = list.map(p => `
+                <section class="video-slide" data-id="${p.id}" ondblclick="likeSlide(event, ${p.id})">
+                    <div class="absolute inset-0" style="background:${p.thumb ? `url('${p.thumb}') center/cover` : `linear-gradient(160deg, ${p.bg[0]}, ${p.bg[1]})`}"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/30"></div>
+                    <div class="absolute right-3 bottom-32 z-20 flex flex-col items-center gap-5">
+                        <button onclick="likeSlide(event, ${p.id})" class="flex flex-col items-center text-xs gap-1">
+                            <span class="w-11 h-11 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-xl">♥</span>
+                            <span id="likes-${p.id}">${p.likes.toLocaleString()}</span>
                         </button>
-                        <button onclick="checkout('네이버페이')" class="bg-[#03C75A] text-white text-xs py-3 font-medium">
-                            N Pay 구매
+                        <button onclick="shareProduct('${p.name}')" class="flex flex-col items-center text-xs gap-1">
+                            <span class="w-11 h-11 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-lg">↗</span>공유
+                        </button>
+                    </div>
+                    <div class="absolute left-4 right-20 bottom-16 z-20 space-y-2">
+                        <span class="text-[10px] bg-rose-500 px-1.5 py-0.5 rounded font-medium">${p.tag}</span>
+                        <h2 class="text-lg font-bold leading-snug">${p.name}</h2>
+                        <p class="text-xs text-white/80 leading-relaxed">${p.desc}</p>
+                        <div class="flex items-center gap-3 pt-1">
+                            <span class="text-base font-bold">${won(p.price)}</span>
+                            <button onclick="openBuyModal(${p.id})" class="bg-white text-black text-xs font-bold px-5 py-2.5 rounded-full">구매하기</button>
+                        </div>
+                    </div>
+                </section>`).join('');
+            feed.scrollTop = 0;
+        }
+
+        function filterFeed(cat, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.className = 'tab-btn hover:text-white pb-0.5';
+            });
+            btn.className = 'tab-btn text-white border-b-2 border-white pb-0.5';
+            renderFeed(cat === 'all' ? products : products.filter(p => p.category === cat));
+        }
+
+        function likeSlide(e, id) {
+            const p = products.find(x => x.id === id);
+            if (!p.liked) { p.liked = true; p.likes++; $('likes-' + id).textContent = p.likes.toLocaleString(); }
+            const slide = e.target.closest('.video-slide');
+            const h = document.createElement('div');
+            h.className = 'heart-anim absolute z-20 text-6xl text-rose-500 pointer-events-none';
+            h.textContent = '♥';
+            const r = slide.getBoundingClientRect();
+            h.style.left = (e.clientX ? e.clientX - r.left : r.width / 2) + 'px';
+            h.style.top = (e.clientY ? e.clientY - r.top : r.height / 2) + 'px';
+            slide.appendChild(h);
+            setTimeout(() => h.remove(), 800);
+        }
+
+        function shareProduct(name) {
+            if (navigator.share) navigator.share({ title: name, url: location.href }).catch(() => {});
+            else if (navigator.clipboard) navigator.clipboard.writeText(location.href).then(() => alert('링크가 복사되었습니다.'));
+        }
+
+        function toggleMute() {
+            muted = !muted;
+            $('mute-icon').textContent = muted ? '🔇' : '🔊';
+            $('mute-text').textContent = muted ? '터치하여 소리 켜기' : '소리 켜짐';
+            document.querySelectorAll('video').forEach(v => v.muted = muted);
+        }
+
+        function openBuyModal(id) {
+            current = products.find(p => p.id === id);
+            selSize = null;
+            selColor = current.colors[0];
+            $('modal-tag').textContent = current.tag;
+            $('modal-title').textContent = current.name;
+            $('modal-price').textContent = won(current.price);
+            const t = $('modal-thumb');
+            t.style.background = current.thumb ? `url('${current.thumb}') center/cover` : `linear-gradient(160deg, ${current.bg[0]}, ${current.bg[1]})`;
+            $('modal-colors').innerHTML = current.colors.map((c, i) =>
+                `<button type="button" onclick="selectColor(this, '${c}')" class="color-dot w-7 h-7 rounded-full border border-stone-300 ${i === 0 ? 'active' : ''}" style="background:${c}" aria-label="컬러 ${i + 1}"></button>`).join('');
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            $('size-hint').textContent = '사이즈를 선택해주세요.';
+            $('size-hint').className = 'text-[11px] text-stone-500 mt-1.5';
+            $('buy-modal').classList.remove('hidden');
+        }
+        function closeBuyModal() { $('buy-modal').classList.add('hidden'); }
+        function selectColor(btn, c) {
+            selColor = c;
+            document.querySelectorAll('.color-dot').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        function selectSize(btn, label) {
+            selSize = label;
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            $('size-hint').textContent = '선택: ' + label;
+            $('size-hint').className = 'text-[11px] text-stone-500 mt-1.5';
+        }
+
+        function addToCart(buyNow) {
+            if (!selSize) {
+                $('size-hint').textContent = '사이즈를 먼저 선택해주세요!';
+                $('size-hint').className = 'text-[11px] text-rose-600 mt-1.5';
+                return;
+            }
+            const found = cart.find(i => i.id === current.id && i.color === selColor && i.size === selSize);
+            if (found) found.qty++;
+            else cart.push({ id: current.id, name: current.name, price: current.price, color: selColor, size: selSize, qty: 1 });
+            updateCart();
+            closeBuyModal();
+            if (buyNow) toggleCart();
+        }
+
+        function changeQty(idx, d) {
+            cart[idx].qty += d;
+            if (cart[idx].qty <= 0) cart.splice(idx, 1);
+            updateCart();
+        }
+
+        function updateCart() {
+            $('cart-badge').textContent = cart.reduce((s, i) => s + i.qty, 0);
+            $('cart-list').innerHTML = cart.length ? cart.map((i, idx) => `
+                <div class="flex items-center justify-between gap-2 text-xs">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="w-4 h-4 rounded-full border border-stone-300 shrink-0" style="background:${i.color}"></span>
+                        <div class="min-w-0"><p class="font-medium truncate">${i.name}</p><p class="text-stone-500">${i.size} · ${won(i.price)}</p></div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="changeQty(${idx}, -1)" class="w-6 h-6 border border-stone-300 rounded">-</button>
+                        <span>${i.qty}</span>
+                        <button onclick="changeQty(${idx}, 1)" class="w-6 h-6 border border-stone-300 rounded">+</button>
+                    </div>
+                </div>`).join('') : '<p class="text-xs text-stone-500 text-center py-4">장바구니가 비어 있습니다.</p>';
+            const sum = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            const fee = sum === 0 || sum >= 50000 ? 0 : 3000;
+            $('ship-fee').textContent = won(fee);
+            $('total-price').textContent = won(sum + fee);
+        }
+
+        function toggleCart() { $('cart-drawer').classList.toggle('hidden'); }
+        function toggleBizInfo() { $('biz-modal').classList.toggle('hidden'); }
+
+        function submitOrder(method) {
+            if (!cart.length) return alert('장바구니가 비어 있습니다.');
+            const name = $('order-name').value.trim(), phone = $('order-phone').value.trim(), addr = $('order-address').value.trim();
+            if (!name || !phone || !addr) return alert('배송지 정보를 모두 입력해주세요.');
+            alert(`${method}로 주문이 접수되었습니다. (데모) \n수령인: ${name}\n결제금액: ${$('total-price').textContent}`);
+            cart = [];
+            updateCart();
+            toggleCart();
+        }
+
+        renderFeed(products);
+        updateCart();
+    </script>
+</body>
+</html>
