@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LUNE ADMIN | 판매자 통합 관리 시스템</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://tailwindcss.com"></script>
+    <link href="https://googleapis.com" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
     </style>
 </head>
 <body class="bg-stone-100 text-stone-900 min-h-screen">
 
-    <!-- 登录框 (默认密码: 1234) -->
+    <!-- 1. 登录界面 -->
     <div id="login-screen" class="fixed inset-0 z-50 bg-stone-950 flex items-center justify-center p-4">
         <div class="bg-white max-w-sm w-full rounded-2xl p-6 space-y-4 shadow-2xl">
             <div class="text-center">
@@ -21,15 +21,18 @@
             </div>
             <div>
                 <label class="block text-xs font-medium text-stone-600 mb-1">관리자 비밀번호</label>
-                <input id="admin-pw" type="password" placeholder="비밀번호 입력 (기본: 1234)" onkeydown="if(event.key==='Enter') checkLogin()" class="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm">
+                <input id="admin-pw" type="text" value="1234" placeholder="비밀번호 입력 (기본: 1234)" onkeydown="if(event.key==='Enter') checkLogin()" class="w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm">
             </div>
-            <button onclick="checkLogin()" class="w-full bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold py-3 rounded-lg transition">
-                관리자 로그인
+            <button type="button" onclick="checkLogin()" class="w-full bg-stone-900 hover:bg-stone-800 text-white text-xs font-bold py-3 rounded-lg transition">
+                관리자 로그인 (1234)
+            </button>
+            <button type="button" onclick="enterDashboard()" class="w-full bg-stone-100 hover:bg-stone-200 text-stone-600 text-xs font-medium py-2.5 rounded-lg transition">
+                비밀번호 없이 바로 입장 (테스트용)
             </button>
         </div>
     </div>
 
-    <!-- 后台主界面 -->
+    <!-- 2. 后台主界面 -->
     <div id="dashboard" class="hidden">
         <nav class="bg-stone-900 text-white px-6 py-4 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 shadow-md">
             <div class="flex items-center space-x-3">
@@ -40,12 +43,12 @@
                 <a href="index.html" target="_blank" class="bg-white text-stone-900 text-xs font-bold px-4 py-2 rounded-lg hover:bg-stone-200 transition">
                     📱 쇼핑몰(index.html) 열기
                 </a>
-                <button onclick="logout()" class="text-xs text-stone-400 hover:text-white underline">로그아웃</button>
+                <button type="button" onclick="location.reload()" class="text-xs text-stone-400 hover:text-white underline">로그아웃</button>
             </div>
         </nav>
 
         <div class="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
-            <!-- 统计卡片 -->
+            <!-- 数据统计 -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200">
                     <p class="text-xs text-stone-500">등록된 숏폼 상품 수</p>
@@ -63,10 +66,10 @@
 
             <!-- 选项卡 -->
             <div class="flex space-x-2 border-b border-stone-300 pb-3">
-                <button onclick="switchTab('products', this)" class="tab-btn bg-stone-900 text-white text-xs font-bold px-4 py-2.5 rounded-lg">
+                <button type="button" onclick="switchTab('products', this)" class="tab-btn bg-stone-900 text-white text-xs font-bold px-4 py-2.5 rounded-lg">
                     1. 상품 및 숏폼 영상 관리
                 </button>
-                <button onclick="switchTab('orders', this)" class="tab-btn bg-white text-stone-600 text-xs font-bold px-4 py-2.5 rounded-lg">
+                <button type="button" onclick="switchTab('orders', this)" class="tab-btn bg-white text-stone-600 text-xs font-bold px-4 py-2.5 rounded-lg">
                     2. 주문 내역 및 택배 송장 관리
                 </button>
             </div>
@@ -109,15 +112,15 @@
                         <label class="block text-xs text-stone-500 mb-1">숏폼 피드 소개글</label>
                         <textarea id="new-desc" rows="2" placeholder="영상 하단에 노출될 설명을 입력하세요." class="w-full border border-stone-300 rounded-lg px-3 py-2 text-xs"></textarea>
                     </div>
-                    <button onclick="addProduct()" class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-3 rounded-lg transition">
+                    <button type="button" onclick="addProduct()" class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-3 rounded-lg transition">
                         + 쇼핑몰에 즉시 등록하기
                     </button>
                 </div>
 
                 <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-stone-200">
                     <div class="flex justify-between items-center border-b pb-2.5 mb-4">
-                        <h3 class="text-sm font-bold">등록된 상품 목록 (index.html 실시간 연동)</h3>
-                        <button onclick="resetDemoData()" class="text-[11px] text-stone-400 hover:text-stone-700 underline">기본 샘플로 초기화</button>
+                        <h3 class="text-sm font-bold">등록된 상품 목록</h3>
+                        <button type="button" onclick="resetDemoData()" class="text-[11px] text-stone-400 hover:text-stone-700 underline">기본 샘플로 초기화</button>
                     </div>
                     <div id="product-list" class="space-y-3"></div>
                 </div>
@@ -127,7 +130,7 @@
             <div id="tab-orders" class="hidden bg-white p-5 rounded-xl shadow-sm border border-stone-200">
                 <div class="flex justify-between items-center border-b pb-3 mb-4">
                     <h3 class="text-sm font-bold">고객 주문 내역 및 택배 송장 입력</h3>
-                    <button onclick="renderAll()" class="text-xs bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded font-medium">🔄 새로고침</button>
+                    <button type="button" onclick="renderAll()" class="text-xs bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded font-medium">🔄 새로고침</button>
                 </div>
                 <div id="order-list" class="space-y-4"></div>
             </div>
@@ -162,6 +165,3 @@
             }
         ];
 
-        function checkLogin() {
-            const pw = document.getElementById('admin-pw').value;
-            if (pw === '1234') {
